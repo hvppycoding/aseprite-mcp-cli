@@ -1173,6 +1173,37 @@ def _paint_pixels(filename: str, layer_name: str, frame_index: int,
     if not target then print("ERROR:Layer not found") return end
 
     local palette = {{ {palette_lua} }}
+    -- Indexed sprites store palette indices rather than RGB pixel values.
+    -- Resolve exact colours before editing; never silently write transparent
+    -- pixels or quantize a colour that is not part of the original palette.
+    if spr.colorMode == ColorMode.INDEXED then
+        local sprpal = spr.palettes[1]
+        if not sprpal then print("ERROR:Indexed sprite has no palette") return end
+        for n, c in ipairs(palette) do
+            if c.alpha == 0 then
+                palette[n] = spr.transparentColor
+            elseif c.alpha ~= 255 then
+                print("ERROR:Indexed draw_rows requires opaque or transparent colours")
+                return
+            else
+                local found = nil
+                for i = 0, #sprpal - 1 do
+                    local entry = sprpal:getColor(i)
+                    if i ~= spr.transparentColor and
+                       entry.red == c.red and entry.green == c.green and entry.blue == c.blue then
+                        found = i
+                        break
+                    end
+                end
+                if found == nil then
+                    print(string.format("ERROR:Colour #%02X%02X%02X is not in the indexed sprite palette",
+                                        c.red, c.green, c.blue))
+                    return
+                end
+                palette[n] = found
+            end
+        end
+    end
     -- {{y, x_first, x_last, palette index}}, sprite-global
     local runs = {{
 {runs_lua}

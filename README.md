@@ -1,5 +1,38 @@
 # Aseprite MCP Tools
 
+> **aseprite-mcp-cli** adds a terminal interface to the excellent
+> **[diivi/aseprite-mcp](https://github.com/diivi/aseprite-mcp)** project.
+> This fork keeps the original 123 tools, MCP support, history, and MIT license.
+> All credit for the Aseprite toolset and pixel-art workflows belongs to diivi
+> and upstream contributors.
+
+### CLI quick start (this fork)
+
+Install [Aseprite](https://www.aseprite.org/) and [uv](https://docs.astral.sh/uv/), then:
+
+```bash
+uv tool install git+https://github.com/hvppycoding/aseprite-mcp-cli.git
+aseprite-cli list
+aseprite-cli schema draw_rows
+```
+
+If Aseprite is not on `PATH`, set `ASEPRITE_PATH` to the executable.
+On macOS, the CLI also checks `/Applications/Aseprite.app/Contents/MacOS/aseprite`.
+
+```bash
+aseprite-cli call get_palette --set filename=robot.aseprite
+aseprite-cli call view_sprite --set filename=robot.aseprite --set layer_name=emblem/ribbon --set output_filename=preview.png
+aseprite-cli call draw_rows --input edits.json
+```
+
+Use `--json '{"filename":"robot.aseprite",...}'` or `--input -` (stdin)
+instead of `--input edits.json` if preferred. Multiple `--set KEY=VALUE`
+arguments accept strings, JSON arrays/objects, booleans, and numbers.
+**Editing tools save the target file**; work on a copy first, especially
+for indexed sprites with strict palette-index requirements.
+
+The original MCP documentation follows.
+
 A Python MCP server that gives AI assistants full control over [Aseprite](https://www.aseprite.org/) for creating pixel art and animated sprites.
 
 **123 tools across 18 categories** — canvas, drawing, layers, animation, palettes, effects, slices, tilemaps, exports, visual-feedback/analysis tools, and a raw Lua escape hatch. The tool set is designed so an LLM has everything it needs to produce *good* pixel art, not just primitives: shading ramps with hue shifting, ordered dithering, outlines, retro palette presets with quantization, onion-skin renders, and frame diffing, bounds and lint checks for animation work.
