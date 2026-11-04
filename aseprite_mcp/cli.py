@@ -13,8 +13,20 @@ from typing import Any
 
 from mcp.server.fastmcp import Image
 
-from . import __version__, mcp
+from . import INSTRUCTIONS, __version__, mcp
 from . import tools as _tools  # noqa: F401  (register all original functions)
+
+
+_HELP_GUIDELINES = """Pixel art guidelines (shared with Aseprite MCP):
+  1. Plan pixel bounds and margins before drawing.
+  2. Draw the silhouette first; use draw_rows for small details.
+  3. Choose a limited palette before adding colour.
+  4. Shade from one light direction; avoid tiny-sprite dithering.
+  5. Use a dark outline and clean, consistent pixel steps.
+  6. Inspect every pass with view_sprite, get_color_stats, and lint_sprite.
+  7. Keep objects attached and away from canvas edges.
+
+Run 'aseprite-cli instructions' for the full MCP guidelines."""
 
 
 def _find_aseprite() -> None:
@@ -80,6 +92,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="aseprite-cli",
         description="Call the original diivi/aseprite-mcp tools from a terminal.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=_HELP_GUIDELINES,
     )
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -87,13 +101,29 @@ def main(argv: list[str] | None = None) -> int:
     ls.add_argument("--json", action="store_true", help="Output names as a JSON array")
     info = sub.add_parser("schema", help="Show a tool's JSON input schema")
     info.add_argument("tool")
-    run = sub.add_parser("call", help="Invoke a tool with JSON or --set KEY=VALUE")
+    instruction_cmd = sub.add_parser(
+        "instructions",
+        help="Print the full pixel-art instructions shared with the MCP server",
+    )
+    instruction_cmd.add_argument(
+        "--json", action="store_true", help="Output the instructions as a JSON object",
+    )
+    run = sub.add_parser(
+        "call",
+        help="Invoke a tool with JSON or --set KEY=VALUE",
+        epilog="For pixel-art best practices, run 'aseprite-cli instructions'.",
+    )
     run.add_argument("tool")
     run.add_argument("--json", help="JSON object containing all arguments")
     run.add_argument("--input", help="JSON file path, or '-' for stdin")
     run.add_argument("--set", action="append", default=[], metavar="KEY=VALUE",
                      help="Override an argument; JSON literals are accepted (repeatable)")
     args = parser.parse_args(argv)
+
+    if args.command == "instructions":
+        print(json.dumps({"instructions": INSTRUCTIONS}, ensure_ascii=False, indent=2)
+              if args.json else INSTRUCTIONS)
+        return 0
 
     registry = mcp._tool_manager
     if args.command == "list":

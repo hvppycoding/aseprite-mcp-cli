@@ -12,6 +12,8 @@ Install [Aseprite](https://www.aseprite.org/) and [uv](https://docs.astral.sh/uv
 
 ```bash
 uv tool install git+https://github.com/hvppycoding/aseprite-mcp-cli.git
+aseprite-cli --help
+aseprite-cli instructions
 aseprite-cli list
 aseprite-cli schema draw_rows
 ```
@@ -30,6 +32,12 @@ instead of `--input edits.json` if preferred. Multiple `--set KEY=VALUE`
 arguments accept strings, JSON arrays/objects, booleans, and numbers.
 **Editing tools save the target file**; work on a copy first, especially
 for indexed sprites with strict palette-index requirements.
+
+The CLI prints a short pixel-art checklist in `aseprite-cli --help` and
+links to `aseprite-cli instructions` for the **complete, verbatim MCP
+instructions**. Use `aseprite-cli instructions --json` to obtain the same
+text as `{"instructions": "..."}` for scripts. `aseprite-cli call --help`
+also points to the instructions. No Aseprite executable is needed to read them.
 
 The original MCP documentation follows.
 
